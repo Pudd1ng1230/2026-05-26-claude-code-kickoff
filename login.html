@@ -1,0 +1,778 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Login - Plant Garden</title>
+<style>
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --green: #7ecb76;
+    --green-deep: #5ba855;
+    --mint: #a8e6cf;
+    --coral: #ffaaa5;
+    --peach: #ffd3b6;
+    --yellow: #fff5d1;
+    --white: #fffef9;
+    --text: #4a4a4a;
+    --text-dim: #999;
+    --error: #ff6b6b;
+    --card-shadow: rgba(0,0,0,0.06);
+  }
+
+  body {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(160deg, #fdf6f0 0%, #f0f9f0 30%, #fdf2f8 60%, #fefefa 100%);
+    font-family: 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+    overflow: hidden;
+    user-select: none;
+  }
+
+  /* ── Background plant decorations ── */
+  .bg-plants {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    overflow: hidden;
+  }
+
+  /* Large decorative leaf in top-left */
+  .leaf-large {
+    position: absolute;
+    top: -60px;
+    left: -40px;
+    width: 280px;
+    height: 280px;
+    opacity: 0.15;
+    animation: leafSway 8s ease-in-out infinite;
+  }
+  .leaf-large svg { width: 100%; height: 100%; fill: #7ecb76; }
+
+  /* Large decorative leaf in bottom-right */
+  .leaf-large-right {
+    position: absolute;
+    bottom: -80px;
+    right: -50px;
+    width: 320px;
+    height: 320px;
+    opacity: 0.12;
+    animation: leafSway 10s ease-in-out infinite reverse;
+    transform: rotate(140deg);
+  }
+  .leaf-large-right svg { width: 100%; height: 100%; fill: #a8e6cf; }
+
+  @keyframes leafSway {
+    0%, 100% { transform: rotate(0deg) translate(0, 0); }
+    25%  { transform: rotate(3deg) translate(8px, -5px); }
+    50%  { transform: rotate(-2deg) translate(-5px, 3px); }
+    75%  { transform: rotate(2deg) translate(3px, -8px); }
+  }
+
+  /* Small floating leaves */
+  .float-leaf {
+    position: fixed;
+    pointer-events: none;
+    opacity: 0.18;
+    animation: floatLeaf 15s ease-in-out infinite;
+  }
+  .float-leaf:nth-child(1) { top: 8%; left: 12%; width: 40px; height: 40px; animation-delay: 0s; }
+  .float-leaf:nth-child(2) { top: 65%; right: 10%; width: 32px; height: 32px; animation-delay: -4s; animation-duration: 18s; }
+  .float-leaf:nth-child(3) { top: 30%; left: 80%; width: 28px; height: 28px; animation-delay: -8s; animation-duration: 13s; }
+  .float-leaf:nth-child(4) { top: 75%; left: 20%; width: 36px; height: 36px; animation-delay: -12s; animation-duration: 16s; }
+  .float-leaf:nth-child(5) { top: 15%; right: 25%; width: 24px; height: 24px; animation-delay: -6s; animation-duration: 14s; }
+
+  @keyframes floatLeaf {
+    0%, 100% { transform: translate(0, 0) rotate(0deg) scale(1); }
+    20%  { transform: translate(25px, -35px) rotate(15deg) scale(1.1); }
+    40%  { transform: translate(-15px, -15px) rotate(-10deg) scale(0.9); }
+    60%  { transform: translate(-20px, -25px) rotate(5deg) scale(1.05); }
+    80%  { transform: translate(10px, -10px) rotate(-5deg) scale(0.95); }
+  }
+
+  /* ── Petal canvas ── */
+  #petals {
+    position: fixed;
+    inset: 0;
+    z-index: 1;
+    pointer-events: none;
+  }
+
+  /* ── Main container ── */
+  .container {
+    position: relative;
+    z-index: 10;
+  }
+
+  .card {
+    position: relative;
+    width: 420px;
+    padding: 48px 40px 36px;
+    background: rgba(255, 255, 255, 0.75);
+    border: 1px solid rgba(255, 255, 255, 0.6);
+    border-radius: 28px;
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    box-shadow:
+      0 8px 32px rgba(0, 0, 0, 0.06),
+      0 2px 8px rgba(0, 0, 0, 0.04);
+    transition: transform 0.15s ease-out, box-shadow 0.3s;
+  }
+  .card:hover {
+    box-shadow:
+      0 16px 48px rgba(0, 0, 0, 0.08),
+      0 4px 12px rgba(0, 0, 0, 0.05);
+  }
+
+  /* ── Small vine decoration on card top ── */
+  .card-vine {
+    position: absolute;
+    top: -18px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .card-vine .dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--green);
+    opacity: 0.7;
+  }
+  .card-vine .dot:nth-child(1) { width: 6px; height: 6px; opacity: 0.5; }
+  .card-vine .dot:nth-child(2) { width: 10px; height: 10px; }
+  .card-vine .dot:nth-child(3) { width: 7px; height: 7px; opacity: 0.6; }
+  .card-vine .dot:nth-child(4) { width: 9px; height: 9px; }
+  .card-vine .dot:nth-child(5) { width: 6px; height: 6px; opacity: 0.5; }
+
+  /* ── Potted plant above title ── */
+  .plant-wrapper {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 4px;
+  }
+  .potted-plant {
+    position: relative;
+    width: 60px;
+    height: 70px;
+  }
+  /* Pot */
+  .pot {
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 36px;
+    height: 28px;
+    background: linear-gradient(135deg, #e8c4a0, #d4a574);
+    border-radius: 4px 4px 12px 12px;
+    border: 2px solid #c9976b;
+  }
+  .pot::after {
+    content: '';
+    position: absolute;
+    top: -2px; left: 50%;
+    transform: translateX(-50%);
+    width: 22px;
+    height: 4px;
+    background: #d4a574;
+    border-radius: 2px;
+    border: 1.5px solid #c9976b;
+  }
+  /* Leaves */
+  .plant-leaf {
+    position: absolute;
+    width: 18px;
+    height: 28px;
+    background: var(--mint);
+    border-radius: 50% 0 50% 50%;
+    border: 1.5px solid var(--green-deep);
+    transform-origin: bottom center;
+  }
+  .plant-leaf:nth-child(2) { left: 8px; bottom: 24px; transform: rotate(-30deg); background: #b8f0d5; }
+  .plant-leaf:nth-child(3) { right: 8px; bottom: 22px; transform: rotate(25deg); }
+  .plant-leaf:nth-child(4) { left: 16px; bottom: 28px; transform: rotate(-10deg); width: 14px; height: 22px; background: #d2f5e6; }
+  .plant-leaf:nth-child(5) { right: 14px; bottom: 30px; transform: rotate(40deg); width: 15px; height: 24px; background: #c5f0d8; }
+
+  /* ── Title ── */
+  .title {
+    text-align: center;
+    margin-bottom: 8px;
+  }
+  .title h1 {
+    font-size: 26px;
+    font-weight: 700;
+    color: #5ba855;
+    letter-spacing: 1px;
+  }
+  .title .sub {
+    font-size: 13px;
+    color: #a0c89e;
+    letter-spacing: 2px;
+    margin-top: 2px;
+  }
+  .title .sub::before { content: '🌿 '; }
+  .title .sub::after { content: ' 🌿'; }
+
+  /* ── Form ── */
+  .form { margin-top: 32px; }
+
+  .field {
+    position: relative;
+    margin-bottom: 30px;
+  }
+  .field label {
+    display: block;
+    font-size: 12px;
+    color: #a0c89e;
+    letter-spacing: 1px;
+    margin-bottom: 6px;
+    transition: color 0.3s;
+    font-weight: 600;
+  }
+  .field .input-wrap {
+    display: flex;
+    align-items: center;
+    background: rgba(168, 230, 207, 0.12);
+    border: 1.5px solid rgba(168, 230, 207, 0.3);
+    border-radius: 14px;
+    padding: 0 16px;
+    transition: border-color 0.3s, background 0.3s, box-shadow 0.3s;
+  }
+  .field .input-icon {
+    width: 18px;
+    height: 18px;
+    margin-right: 10px;
+    flex-shrink: 0;
+    opacity: 0.45;
+    transition: opacity 0.3s;
+  }
+  .field input {
+    width: 100%;
+    padding: 14px 0;
+    font-size: 15px;
+    color: var(--text);
+    background: transparent;
+    border: none;
+    outline: none;
+    letter-spacing: 0.5px;
+  }
+  .field input::placeholder { color: #ccc; }
+  .field.focused .input-wrap {
+    border-color: var(--green);
+    background: rgba(168, 230, 207, 0.2);
+    box-shadow: 0 0 0 4px rgba(126, 203, 118, 0.08);
+  }
+  .field.focused .input-icon { opacity: 0.8; }
+  .field.focused label { color: var(--green-deep); }
+
+  /* ── Password toggle ── */
+  .toggle-pw {
+    background: none; border: none;
+    cursor: pointer;
+    padding: 6px;
+    color: #c0c0c0;
+    transition: color 0.3s;
+    display: flex;
+    align-items: center;
+    flex-shrink: 0;
+  }
+  .toggle-pw:hover { color: var(--green-deep); }
+  .eye-icon { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
+
+  /* ── Options row ── */
+  .options {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin: -4px 0 26px;
+    font-size: 13px;
+  }
+  .remember {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    color: #aaa;
+    transition: color 0.3s;
+  }
+  .remember:hover { color: #888; }
+  .remember input { display: none; }
+  .checkmark {
+    width: 20px; height: 20px;
+    border: 1.5px solid #d0e8d0;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s;
+    background: rgba(168, 230, 207, 0.15);
+  }
+  .remember input:checked + .checkmark {
+    background: linear-gradient(135deg, var(--green), var(--mint));
+    border-color: transparent;
+  }
+  .checkmark svg {
+    width: 12px; height: 12px;
+    fill: none; stroke: #fff; stroke-width: 2.5;
+    opacity: 0; transform: scale(0.5);
+    transition: all 0.2s;
+  }
+  .remember input:checked + .checkmark svg { opacity: 1; transform: scale(1); }
+
+  .links { display: flex; gap: 16px; }
+  .links a {
+    color: #bbb;
+    text-decoration: none;
+    transition: color 0.3s;
+    font-size: 13px;
+  }
+  .links a:hover { color: var(--green-deep); }
+
+  /* ── Button ── */
+  .btn {
+    position: relative;
+    width: 100%;
+    padding: 15px;
+    font-size: 15px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    color: #fff;
+    background: linear-gradient(135deg, #7ecb76, #5ba855);
+    border: none;
+    border-radius: 16px;
+    cursor: pointer;
+    overflow: hidden;
+    transition: transform 0.2s, box-shadow 0.3s;
+    box-shadow: 0 4px 20px rgba(126, 203, 118, 0.35);
+  }
+  .btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 30px rgba(126, 203, 118, 0.5);
+  }
+  .btn:active { transform: translateY(0) scale(0.98); }
+  .btn::before {
+    content: '';
+    position: absolute;
+    top: 0; left: -100%;
+    width: 60%; height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+    transition: left 0.5s;
+    pointer-events: none;
+  }
+  .btn:hover::before { left: 120%; }
+
+  /* ── Loading state ── */
+  .btn.loading { pointer-events: none; opacity: 0.8; }
+  .btn.loading .btn-text { visibility: hidden; }
+  .spinner {
+    position: absolute;
+    inset: 0;
+    display: none;
+    align-items: center;
+    justify-content: center;
+  }
+  .btn.loading .spinner { display: flex; }
+  .spinner::before {
+    content: '';
+    width: 22px; height: 22px;
+    border: 2.5px solid rgba(255,255,255,0.3);
+    border-top-color: #fff;
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* ── Shake animation ── */
+  .shake {
+    animation: shake 0.5s cubic-bezier(0.36, 0.07, 0.19, 0.97);
+  }
+  @keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    10%, 30%, 50%, 70%, 90% { transform: translateX(-6px); }
+    20%, 40%, 60%, 80% { transform: translateX(6px); }
+  }
+  .field.error .input-wrap {
+    border-color: var(--error);
+    background: rgba(255, 107, 107, 0.06);
+  }
+  .field.error label { color: var(--error); }
+  .field.error input { color: var(--error); }
+  .field.error .input-icon { opacity: 0.8; }
+
+  /* ── Success modal ── */
+  .overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.25);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.4s;
+  }
+  .overlay.show { opacity: 1; pointer-events: auto; }
+
+  .modal {
+    background: rgba(255, 255, 255, 0.92);
+    border: 1px solid rgba(168, 230, 207, 0.3);
+    border-radius: 24px;
+    padding: 40px 36px;
+    text-align: center;
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
+    transform: scale(0.8) translateY(20px);
+    transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    max-width: 380px;
+  }
+  .overlay.show .modal { transform: scale(1) translateY(0); }
+
+  .modal .check-circle {
+    width: 72px; height: 72px;
+    margin: 0 auto 20px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #7ecb76, #a8e6cf);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 16px rgba(126, 203, 118, 0.3);
+  }
+  .modal .check-circle svg {
+    width: 36px; height: 36px;
+    fill: none; stroke: #fff; stroke-width: 2.5;
+    stroke-dasharray: 50;
+    stroke-dashoffset: 50;
+    animation: drawCheck 0.5s 0.2s forwards;
+  }
+  @keyframes drawCheck { to { stroke-dashoffset: 0; } }
+
+  .modal h2 { color: #5ba855; font-size: 22px; margin-bottom: 8px; font-weight: 700; }
+  .modal p { color: #a0c89e; font-size: 14px; margin-bottom: 24px; }
+
+  .modal .close-btn {
+    padding: 10px 36px;
+    border-radius: 12px;
+    border: 1.5px solid rgba(168, 230, 207, 0.4);
+    background: rgba(168, 230, 207, 0.15);
+    color: #5ba855;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 600;
+    transition: all 0.3s;
+  }
+  .modal .close-btn:hover {
+    background: rgba(168, 230, 207, 0.3);
+    border-color: var(--green);
+  }
+
+  /* ── Responsive ── */
+  @media (max-width: 480px) {
+    .card { width: 90vw; padding: 36px 28px 28px; }
+    .options { flex-direction: column; gap: 14px; align-items: flex-start; }
+  }
+</style>
+</head>
+<body>
+
+  <!-- Background plant decorations -->
+  <div class="bg-plants">
+    <div class="leaf-large">
+      <svg viewBox="0 0 100 100">
+        <ellipse cx="35" cy="50" rx="30" ry="45" transform="rotate(-20 35 50)"/>
+        <line x1="35" y1="5" x2="35" y2="95" stroke="#5ba855" stroke-width="1.5" opacity="0.4"/>
+      </svg>
+    </div>
+    <div class="leaf-large-right">
+      <svg viewBox="0 0 100 100">
+        <ellipse cx="35" cy="50" rx="28" ry="42" transform="rotate(-20 35 50)"/>
+        <line x1="35" y1="8" x2="35" y2="92" stroke="#5ba855" stroke-width="1.5" opacity="0.4"/>
+      </svg>
+    </div>
+  </div>
+
+  <!-- Floating leaves -->
+  <div class="float-leaf">
+    <svg viewBox="0 0 24 24" fill="#a8e6cf"><path d="M17 8C8 10 5.9 16.17 3.82 21.34l1.89.66.95-2.3c.48.17.98.3 1.34.3C19 20 22 3 22 3c-1 2-8 2.25-13 3.25S2 11.5 2 13.5s1.75 3.75 1.75 3.75"/></svg>
+  </div>
+  <div class="float-leaf">
+    <svg viewBox="0 0 24 24" fill="#ffd3b6"><path d="M17 8C8 10 5.9 16.17 3.82 21.34l1.89.66.95-2.3c.48.17.98.3 1.34.3C19 20 22 3 22 3c-1 2-8 2.25-13 3.25S2 11.5 2 13.5s1.75 3.75 1.75 3.75"/></svg>
+  </div>
+  <div class="float-leaf">
+    <svg viewBox="0 0 24 24" fill="#7ecb76"><path d="M17 8C8 10 5.9 16.17 3.82 21.34l1.89.66.95-2.3c.48.17.98.3 1.34.3C19 20 22 3 22 3c-1 2-8 2.25-13 3.25S2 11.5 2 13.5s1.75 3.75 1.75 3.75"/></svg>
+  </div>
+  <div class="float-leaf">
+    <svg viewBox="0 0 24 24" fill="#ffaaa5"><path d="M17 8C8 10 5.9 16.17 3.82 21.34l1.89.66.95-2.3c.48.17.98.3 1.34.3C19 20 22 3 22 3c-1 2-8 2.25-13 3.25S2 11.5 2 13.5s1.75 3.75 1.75 3.75"/></svg>
+  </div>
+  <div class="float-leaf">
+    <svg viewBox="0 0 24 24" fill="#a8e6cf"><path d="M17 8C8 10 5.9 16.17 3.82 21.34l1.89.66.95-2.3c.48.17.98.3 1.34.3C19 20 22 3 22 3c-1 2-8 2.25-13 3.25S2 11.5 2 13.5s1.75 3.75 1.75 3.75"/></svg>
+  </div>
+
+  <canvas id="petals"></canvas>
+
+  <!-- Login card -->
+  <div class="container">
+    <div class="card" id="card">
+      <!-- Vine decoration -->
+      <div class="card-vine">
+        <span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span>
+      </div>
+
+      <!-- Potted plant -->
+      <div class="plant-wrapper">
+        <div class="potted-plant">
+          <div class="plant-leaf"></div>
+          <div class="plant-leaf"></div>
+          <div class="plant-leaf"></div>
+          <div class="plant-leaf"></div>
+          <div class="plant-leaf"></div>
+          <div class="pot"></div>
+        </div>
+      </div>
+
+      <div class="title">
+        <h1>Welcome</h1>
+        <div class="sub">Sign in to continue</div>
+      </div>
+
+      <form class="form" id="loginForm" autocomplete="off">
+        <!-- Username -->
+        <div class="field" id="fieldUsername">
+          <label for="username">Email / Username</label>
+          <div class="input-wrap">
+            <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+              <circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/>
+            </svg>
+            <input type="text" id="username" placeholder="you@example.com" autocomplete="off">
+          </div>
+        </div>
+
+        <!-- Password -->
+        <div class="field" id="fieldPassword">
+          <label for="password">Password</label>
+          <div class="input-wrap">
+            <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+              <rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/>
+            </svg>
+            <input type="password" id="password" placeholder="········" autocomplete="off">
+            <button type="button" class="toggle-pw" id="togglePw" aria-label="Toggle password visibility">
+              <svg class="eye-icon" id="eyeOff" viewBox="0 0 24 24">
+                <path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19M14.12 14.12a3 3 0 11-4.24-4.24"/>
+                <line x1="1" y1="1" x2="23" y2="23"/>
+              </svg>
+              <svg class="eye-icon" id="eyeOn" viewBox="0 0 24 24" style="display:none;">
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                <circle cx="12" cy="12" r="3"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <!-- Options -->
+        <div class="options">
+          <label class="remember">
+            <input type="checkbox" id="remember">
+            <span class="checkmark">
+              <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+            </span>
+            Remember me
+          </label>
+          <div class="links">
+            <a href="#">Forgot password?</a>
+            <a href="#">Sign up</a>
+          </div>
+        </div>
+
+        <!-- Button -->
+        <button type="submit" class="btn" id="loginBtn">
+          <span class="btn-text">Log In</span>
+          <span class="spinner"></span>
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Success modal -->
+  <div class="overlay" id="overlay">
+    <div class="modal">
+      <div class="check-circle">
+        <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+      </div>
+      <h2>Welcome back!</h2>
+      <p>Authentication successful. Redirecting…</p>
+      <button class="close-btn" id="closeModal">Got it</button>
+    </div>
+  </div>
+
+<script>
+  // ── Petals ──
+  (function() {
+    const canvas = document.getElementById('petals');
+    const ctx = canvas.getContext('2d');
+    let petals = [];
+    const max = 60;
+    const colors = ['#a8e6cf', '#ffd3b6', '#ffaaa5', '#7ecb76', '#fff5d1'];
+
+    function resize() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    }
+    resize();
+    window.addEventListener('resize', resize);
+
+    class Petal {
+      constructor() {
+        this.reset();
+        this.y = Math.random() * canvas.height;
+      }
+      reset() {
+        this.x = Math.random() * canvas.width;
+        this.y = -20;
+        this.size = Math.random() * 4 + 2;
+        this.speed = Math.random() * 0.5 + 0.2;
+        this.opacity = Math.random() * 0.4 + 0.15;
+        this.drift = (Math.random() - 0.5) * 0.5;
+        this.wobble = Math.random() * Math.PI * 2;
+        this.wobbleSpeed = Math.random() * 0.02 + 0.005;
+        this.color = colors[Math.floor(Math.random() * colors.length)];
+      }
+      update() {
+        this.y += this.speed;
+        this.wobble += this.wobbleSpeed;
+        this.x += this.drift + Math.sin(this.wobble) * 0.3;
+        if (this.y > canvas.height + 20) this.reset();
+        if (this.x < -20) this.x = canvas.width + 20;
+        if (this.x > canvas.width + 20) this.x = -20;
+      }
+      draw() {
+        ctx.beginPath();
+        ctx.ellipse(this.x, this.y, this.size, this.size * 0.55, 0, 0, Math.PI * 2);
+        ctx.fillStyle = this.color.replace(')', `, ${this.opacity})`).replace('rgb', 'rgba');
+        if (this.color.startsWith('#')) {
+          ctx.fillStyle = this.color;
+          ctx.globalAlpha = this.opacity;
+        }
+        ctx.fill();
+        ctx.globalAlpha = 1;
+      }
+    }
+
+    for (let i = 0; i < max; i++) petals.push(new Petal());
+
+    function animate() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      petals.forEach(p => { p.update(); p.draw(); });
+      requestAnimationFrame(animate);
+    }
+    animate();
+  })();
+
+  // ── 3D Tilt ──
+  (function() {
+    const card = document.getElementById('card');
+    const container = document.querySelector('.container');
+    const maxTilt = 5;
+
+    document.addEventListener('mousemove', e => {
+      const rect = container.getBoundingClientRect();
+      const cx = rect.left + rect.width / 2;
+      const cy = rect.top + rect.height / 2;
+      const rotateX = ((e.clientY - cy) / rect.height) * -maxTilt;
+      const rotateY = ((e.clientX - cx) / rect.width) * maxTilt;
+      card.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
+    });
+
+    document.addEventListener('mouseleave', () => {
+      card.style.transform = 'rotateX(0deg) rotateY(0deg)';
+    });
+  })();
+
+  // ── Password toggle ──
+  (function() {
+    const pwInput = document.getElementById('password');
+    const eyeOff = document.getElementById('eyeOff');
+    const eyeOn  = document.getElementById('eyeOn');
+
+    document.getElementById('togglePw').addEventListener('click', () => {
+      const isHidden = pwInput.type === 'password';
+      pwInput.type = isHidden ? 'text' : 'password';
+      eyeOff.style.display = isHidden ? 'none' : 'block';
+      eyeOn.style.display  = isHidden ? 'block' : 'none';
+    });
+  })();
+
+  // ── Focus label glow ──
+  (function() {
+    document.querySelectorAll('.field input').forEach(input => {
+      input.addEventListener('focus', () => input.closest('.field').classList.add('focused'));
+      input.addEventListener('blur',  () => input.closest('.field').classList.remove('focused'));
+    });
+  })();
+
+  // ── Shake helper ──
+  function shakeField(fieldEl) {
+    fieldEl.classList.add('error', 'shake');
+    fieldEl.addEventListener('animationend', () => fieldEl.classList.remove('shake'), { once: true });
+  }
+
+  function clearErrors() {
+    document.querySelectorAll('.field.error').forEach(el => el.classList.remove('error'));
+  }
+
+  // ── Form submit ──
+  (function() {
+    const form     = document.getElementById('loginForm');
+    const btn      = document.getElementById('loginBtn');
+    const username = document.getElementById('username');
+    const password = document.getElementById('password');
+    const overlay  = document.getElementById('overlay');
+
+    form.addEventListener('submit', e => {
+      e.preventDefault();
+      clearErrors();
+
+      let hasError = false;
+
+      if (!username.value.trim()) {
+        shakeField(document.getElementById('fieldUsername'));
+        hasError = true;
+      }
+      if (!password.value.trim()) {
+        shakeField(document.getElementById('fieldPassword'));
+        hasError = true;
+      }
+
+      if (hasError) return;
+
+      btn.classList.add('loading');
+
+      setTimeout(() => {
+        btn.classList.remove('loading');
+        overlay.classList.add('show');
+      }, 2000);
+    });
+  })();
+
+  // ── Modal close ──
+  (function() {
+    const overlay = document.getElementById('overlay');
+    document.getElementById('closeModal').addEventListener('click', () => {
+      overlay.classList.remove('show');
+    });
+    overlay.addEventListener('click', e => {
+      if (e.target === overlay) overlay.classList.remove('show');
+    });
+  })();
+</script>
+</body>
+</html>

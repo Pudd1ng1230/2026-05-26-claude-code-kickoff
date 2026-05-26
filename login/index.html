@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Login - Glassmorphism</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- Background layers -->
+  <div class="bg-layer"></div>
+  <div class="orb"></div>
+  <div class="orb"></div>
+  <div class="orb"></div>
+  <canvas id="particles"></canvas>
+
+  <!-- Login card -->
+  <div class="container">
+    <div class="card" id="card">
+      <div class="title">
+        <h1>WELCOME</h1>
+        <div class="sub">Sign in to continue</div>
+      </div>
+
+      <form class="form" id="loginForm" autocomplete="off">
+        <!-- Username -->
+        <div class="field" id="fieldUsername">
+          <label for="username">Email / Username</label>
+          <input type="text" id="username" placeholder="you@example.com" autocomplete="off">
+          <div class="line"></div>
+          <div class="glow"></div>
+        </div>
+
+        <!-- Password -->
+        <div class="field" id="fieldPassword">
+          <label for="password">Password</label>
+          <input type="password" id="password" placeholder="········" autocomplete="off">
+          <button type="button" class="toggle-pw" id="togglePw" aria-label="Toggle password visibility">
+            <svg class="eye-icon" id="eyeOff" viewBox="0 0 24 24">
+              <path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19M14.12 14.12a3 3 0 11-4.24-4.24"/>
+              <line x1="1" y1="1" x2="23" y2="23"/>
+            </svg>
+            <svg class="eye-icon" id="eyeOn" viewBox="0 0 24 24" style="display:none;">
+              <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+              <circle cx="12" cy="12" r="3"/>
+            </svg>
+          </button>
+          <div class="line"></div>
+          <div class="glow"></div>
+        </div>
+
+        <!-- Options -->
+        <div class="options">
+          <label class="remember">
+            <input type="checkbox" id="remember">
+            <span class="checkmark">
+              <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+            </span>
+            Remember me
+          </label>
+          <div class="links">
+            <a href="#">Forgot password?</a>
+            <a href="#">Sign up</a>
+          </div>
+        </div>
+
+        <!-- Button -->
+        <button type="submit" class="btn" id="loginBtn">
+          <span class="btn-text">Log In</span>
+          <span class="spinner"></span>
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Success modal -->
+  <div class="overlay" id="overlay">
+    <div class="modal">
+      <div class="check-circle">
+        <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+      </div>
+      <h2>Welcome back!</h2>
+      <p>Authentication successful. Redirecting…</p>
+      <button class="close-btn" id="closeModal">Got it</button>
+    </div>
+  </div>
+
+<script src="script.js"></script>
+</body>
+</html>
